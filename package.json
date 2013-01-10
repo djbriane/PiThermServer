@@ -7,7 +7,5 @@
   },
   "dependencies": {
     "node-static": "*"
-    //"express": "2.5.x",
-    //"colors": "0.6.x",
   }
 }
