@@ -6,12 +6,58 @@
 // Ref: www.cl.cam.ac.uk/freshers/raspberrypi/tutorials/temperature/
 
 // Load node modules
-var fs = require('fs');
-var sys = require('sys');
-var http = require('http');
+var fs = require('fs'),
+    sys = require('sys'),
+    http = require('http'),
+    util = require('util'),
+    colors = require('colors');
 
-// Use node-static module to server chart for client-side dynamic graph
-var nodestatic = require('node-static');
+// Use node-static module to serve chart for client-side dynamic graph
+var nodestatic = require('node-static'),
+    port = process.env.PORT || 8000;
+
+// Obtains the device IP on the network
+// TODO: Move this into external file
+// Source: http://stackoverflow.com/questions/3653065/get-local-ip-address-in-node-js
+var getNetworkIP = (function () {
+    var ignoreRE = /^(127\.0\.0\.1|::1|fe80(:1)?::1(%.*)?)$/i;
+
+    var exec = require('child_process').exec,
+        cached,
+        command = 'ifconfig',
+        filterRE = /\binet\s+([^\s]+)/g;
+
+    return function (callback, bypassCache) {
+         // get cached value
+        if (cached && !bypassCache) {
+            callback(null, cached);
+            return;
+        }
+        // system call
+        exec(command, function (error, stdout, sterr) {
+            var i, ips = [];
+            // extract IPs
+            var matches = stdout.match(filterRE);
+            // JS has no lookbehind REs, so we need a trick
+            for (i = 0; i < matches.length; i=i+1) {
+                ips.push(matches[i].replace(filterRE, '$1'));
+            }
+
+            // filter BS
+            for (i = 0, l = ips.length; i < l; i=i+1) {
+                if (!ignoreRE.test(ips[i])) {
+                    //if (!error) {
+                        cached = ips[i];
+                    //}
+                    callback(error, ips[i]);
+                    return;
+                }
+            }
+            // nothing found
+            callback(error, null);
+        });
+    };
+})();
 
 // Setup static server for current directory
 var staticServer = new nodestatic.Server(".");
@@ -59,25 +105,40 @@ var server = http.createServer(
       });
     }
     else {
-        // Print requested file to terminal
-       console.log('Request from '+ request.connection.remoteAddress +', for: ' + pathfile);
+      // Print requested file to terminal
+      util.puts('Request from '.blue + (request.connection.remoteAddress + '').magenta +
+                ' for: '.blue + (pathfile + '').yellow);
 
-         // Serve file using node-static
-         staticServer.serve(request, response, function (err, result) {
-          if (err){
-            // Log the error
-            sys.error("Error serving " + request.url + " - " + err.message);
+      // Serve file using node-static
+      staticServer.serve(request, response, function (err, result) {
+        if (err){
+          // Log the error
+          sys.error("Error serving " + request.url + " - " + err.message);
 
-            // Respond to the client
-            response.writeHead(err.status, err.headers);
-            response.end('Error 404 - file not found');
-            }
-          });
+          // Respond to the client
+          response.writeHead(err.status, err.headers);
+          response.end('Error 404 - file not found');
+        }
+      });
     }
 });
 
 // Enable server
-server.listen(8000);
+server.listen(port);
 
-// Log message
-console.log('Server running at http://localhost:8000');
+// resolve the device IP, then display message
+getNetworkIP(function (error, ip) {
+  var ipAddress = ip;
+
+  // if IP address can't be found, just show 'localhost'
+  if (error) {
+    ipAddress = 'localhost';
+    sys.error('Error obtaining network IP: '.red + error);
+  }
+
+  // Log message
+  util.puts('HTTP server '.blue + 'started'.green + ' at '.blue +
+            ('http://' + ipAddress + ':' + port).yellow);
+
+}, false);
+
