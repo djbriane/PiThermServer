@@ -12,12 +12,17 @@ var fs = require('fs'),
     util = require('util'),
     colors = require('colors');
 
+// define sensor serial number (will be different for each sensor)
+// to list available sensors, enter 'ls /sys/bus/w1/devices/'
+// TODO: lookup sensors automatically
+var sensorId = '28-00000418941a'; // DS18B20 (bare)
+
 // Use node-static module to serve chart for client-side dynamic graph
 var nodestatic = require('node-static'),
     port = process.env.PORT || 8000;
 
 // Obtains the device IP on the network
-// TODO: Move this into external file
+// TODO: Move this into external file / npm package
 // Source: http://stackoverflow.com/questions/3653065/get-local-ip-address-in-node-js
 var getNetworkIP = (function () {
   var ignoreRE = /^(127\.0\.0\.1|::1|fe80(:1)?::1(%.*)?)$/i;
@@ -35,34 +40,38 @@ var getNetworkIP = (function () {
   }
 
   return function (callback, bypassCache) {
-       // get cached value
-      if (cached && !bypassCache) {
-          callback(null, cached);
-          return;
-      }
-      // system call
-      exec(command, function (error, stdout, sterr) {
-          var i, ips = [];
-          // extract IPs
-          var matches = stdout.match(filterRE);
-          // JS has no lookbehind REs, so we need a trick
-          for (i = 0; i < matches.length; i=i+1) {
-              ips.push(matches[i].replace(filterRE, '$1'));
-          }
+     // get cached value
+    if (cached && !bypassCache) {
+      callback(null, cached);
+      return;
+    }
 
-          // filter BS
-          for (i = 0, l = ips.length; i < l; i=i+1) {
-              if (!ignoreRE.test(ips[i])) {
-                  //if (!error) {
-                      cached = ips[i];
-                  //}
-                  callback(error, ips[i]);
-                  return;
-              }
-          }
-          // nothing found
-          callback(error, null);
-      });
+    // system call
+    exec(command, function (error, stdout, sterr) {
+      var i, matches, ips = [];
+
+      // extract IPs
+      matches = stdout.match(filterRE);
+
+      // JS has no lookbehind REs, so we need a trick
+      for (i = 0; i < matches.length; i=i+1) {
+        ips.push(matches[i].replace(filterRE, '$1'));
+      }
+
+      // filter BS
+      for (i = 0, l = ips.length; i < l; i=i+1) {
+        if (!ignoreRE.test(ips[i])) {
+          //if (!error) {
+            cached = ips[i];
+          //}
+          callback(error, ips[i]);
+          return;
+        }
+      }
+
+      // nothing found
+      callback(error, null);
+    });
   };
 })();
 
@@ -83,7 +92,7 @@ var server = http.createServer(
     {
       // Function to read thermal sensor and return JSON representation of first word (i.e. the data)
       // Note device location is sensor specific.
-      fs.readFile('/sys/bus/w1/devices/28-00000400a88a/w1_slave', function(err, buffer)
+      fs.readFile('/sys/bus/w1/devices/' + sensorId + '/w1_slave', function(err, buffer)
       {
         if (err)
         {
@@ -133,7 +142,7 @@ var server = http.createServer(
 // Enable server
 server.listen(port);
 
-// resolve the device IP, then display message
+// resolve the device IP, then display server started message
 getNetworkIP(function (error, ip) {
   var ipAddress = ip;
 

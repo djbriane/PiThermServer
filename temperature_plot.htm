@@ -8,7 +8,7 @@
 		<script src="http://code.jquery.com/jquery-1.8.3.min.js" type="text/javascript"></script>
 		<script src="http://code.highcharts.com/highcharts.js" type="text/javascript"></script>
 		<script type="text/javascript">
-		
+
 		var chart; // global chart variable
 
 		// Get data from Pi NodeJS server
@@ -17,7 +17,7 @@
 				// Create the series
 				var series  = chart.series[0],
 					shift = series.data.length > 20; // shift if the series longer than 20
-	
+
 				// Add the point
 				chart.series[0].addPoint(data, true, shift);
 
@@ -62,13 +62,13 @@
 		    name: 'Temperature \u00B0C',
 		    data: []
 		}]
-	    });        
+	    });
 	});
-	</script>			
+	</script>
 	</head>
 
 	<body>
 	<div id="container" style="width: 100%; height: 400px"></div>
-	
+
 	</body>
 </html>
