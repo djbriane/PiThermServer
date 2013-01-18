@@ -15,11 +15,14 @@
 		function getData(){
 			$.getJSON('./temperature.json', function(data) {
 				// Create the series
-				var series  = chart.series[0],
-					shift = series.data.length > 20; // shift if the series longer than 20
+				var series = chart.series[0],
+						shift = series.data.length > 20; // shift if the series longer than 20
+
+				console.log("Data Point: ", JSON.parse(data[0]));
+				console.log("Data Value: ", JSON.parse(data[0]).value);
 
 				// Add the point
-				chart.series[0].addPoint(data, true, shift);
+				chart.series[0].addPoint(JSON.parse(data[0]).value, true, shift);
 
 				// Repeat this function call after 1 second
 				setTimeout(getData, 1000);
@@ -30,7 +33,7 @@
 	<script type="text/javascript">
    // Configure the plot
 	$(document).ready(function() {
-	    chart = new Highcharts.Chart({
+	  chart = new Highcharts.Chart({
 		chart: {
 		    renderTo: 'container',
 		    defaultSeriesType: 'spline',
@@ -54,12 +57,12 @@
 		    minPadding: 0.2,
 		    maxPadding: 0.2,
 		    title: {
-		        text: 'DS18B20 Temperature Sensor (\u00B10.5\u00B0C)',
+		        text: 'DS18B20 Temperature Sensor (\u00B11\u00B0F)',
 		        margin: 80
 		    }
 		},
 		series: [{
-		    name: 'Temperature \u00B0C',
+		    name: 'Temperature \u00B0F',
 		    data: []
 		}]
 	    });

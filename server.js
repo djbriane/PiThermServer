@@ -5,75 +5,70 @@
 // Tom Holderness 03/01/2013
 // Ref: www.cl.cam.ac.uk/freshers/raspberrypi/tutorials/temperature/
 
-// Load node modules
+// Load node module dependencies
 var fs = require('fs'),
     sys = require('sys'),
     http = require('http'),
     util = require('util'),
-    colors = require('colors');
+    colors = require('colors'),
+    moment = require('moment');
+
+// Load local modules
+var networkIp = require('./networkip.js');
+
+// redis DB setup
+var redis = require('redis'),
+    dbclient = redis.createClient();
+
+dbclient.on('error', function (err) {
+    console.error('Redis Error ' + err);
+});
 
 // define sensor serial number (will be different for each sensor)
 // to list available sensors, enter 'ls /sys/bus/w1/devices/'
 // TODO: lookup sensors automatically
-var sensorId = '28-00000418941a'; // DS18B20 (bare)
+//var TEMP_SENSOR_ID1 = '28-00000418941a'; // DS18B20 (bare)
+var TEMP_SENSOR_ID1 = 'dev-temp-sensor'; // test sensor
+
 
 // Use node-static module to serve chart for client-side dynamic graph
 var nodestatic = require('node-static'),
     port = process.env.PORT || 8000;
 
-// Obtains the device IP on the network
-// TODO: Move this into external file / npm package
-// Source: http://stackoverflow.com/questions/3653065/get-local-ip-address-in-node-js
-var getNetworkIP = (function () {
-  var ignoreRE = /^(127\.0\.0\.1|::1|fe80(:1)?::1(%.*)?)$/i;
+// start polling the temp sensor and save to DB
+function pollSensor(sensorId) {
+  var readingData, sensorValue;
 
-  var exec = require('child_process').exec,
-      cached,
-      command = 'ifconfig',
-      filterRE = /\binet\b[^:]+:\s*([^\s]+)/g;
-      // filterRE = /\binet6[^:]+:\s*([^\s]+)/g; // IPv6
+  // Function to read thermal sensor and return JSON representation of first word (i.e. the data)
+  // Note device location is sensor specific.
+  fs.readFile('/sys/bus/w1/devices/' + sensorId + '/w1_slave', function(err, buffer) {
 
-  if (process.platform === 'darwin') {
-    command = 'ifconfig';
-    filterRE = /\binet\s+([^\s]+)/g;
-    // filterRE = /\binet6\s+([^\s]+)/g; // IPv6
-  }
+    var data;
 
-  return function (callback, bypassCache) {
-     // get cached value
-    if (cached && !bypassCache) {
-      callback(null, cached);
+    if (err) {
+      response.writeHead(500, { "Content-type": "text/html" });
+      response.end(err + "\n");
       return;
     }
 
-    // system call
-    exec(command, function (error, stdout, sterr) {
-      var i, matches, ips = [];
+    // Read data from file (using fast node ASCII encoding).
+    data = buffer.toString('ascii').split(" "); // Split by space
 
-      // extract IPs
-      matches = stdout.match(filterRE);
+    if (data) {
+      sensorValue = parseFloat(data[data.length - 1].split('=')[1]);
+    }
 
-      // JS has no lookbehind REs, so we need a trick
-      for (i = 0; i < matches.length; i=i+1) {
-        ips.push(matches[i].replace(filterRE, '$1'));
-      }
+  });
 
-      // filter BS
-      for (i = 0, l = ips.length; i < l; i=i+1) {
-        if (!ignoreRE.test(ips[i])) {
-          //if (!error) {
-            cached = ips[i];
-          //}
-          callback(error, ips[i]);
-          return;
-        }
-      }
+  timeNow = moment();
+  readingData = { time: timeNow.valueOf(), value: sensorValue };
 
-      // nothing found
-      callback(error, null);
-    });
-  };
-})();
+  // write sensor data to Redis DB
+  dbclient.zadd(sensorId, timeNow.valueOf(), JSON.stringify(readingData), redis.print);
+
+  dbclient.quit();
+}
+
 
 // Setup static server for current directory
 var staticServer = new nodestatic.Server(".");
@@ -84,43 +79,36 @@ var server = http.createServer(
   function(request, response)
   {
     // Grab the URL requested by the client
-    var url = require('url').parse(request.url);
-    var pathfile = url.pathname;
+    var url = require('url').parse(request.url),
+        pathfile = url.pathname,
+        tempData;
 
     // Test to see if it's a request for temperature data
-    if (pathfile === '/temperature.json')
-    {
-      // Function to read thermal sensor and return JSON representation of first word (i.e. the data)
-      // Note device location is sensor specific.
-      fs.readFile('/sys/bus/w1/devices/' + sensorId + '/w1_slave', function(err, buffer)
-      {
-        if (err)
-        {
-          response.writeHead(500, { "Content-type": "text/html" });
-          response.end(err + "\n");
-          return;
+    if (pathfile === '/temperature.json') {
+      dbclient.zrangebyscore([TEMP_SENSOR_ID1, moment().subtract('hours', 1).valueOf(), moment().valueOf()], function (err, res) {
+        console.log('temp data: ', JSON.stringify(res));
+
+        response.writeHead(200, { "Content-type": "application/json" });
+        if (!res) {
+          res = [];
         }
-      // Read data from file (using fast node ASCII encoding).
-      var data = buffer.toString('ascii').split(" "); // Split by space
+        response.end(JSON.stringify(res), "ascii");
+
+        //dbclient.quit();
+      });
+
 
       // Extract temperature from string and divide by 1000 to give celsius
-      var temp  = parseFloat(data[data.length-1].split("=")[1])/1000.0;
+      //var temp  = parseFloat(data[data.length-1].split("=")[1])/1000.0;
 
       // Round to one decimal place
-      temp = Math.round(temp * 10) / 10;
+      //temp = Math.round(temp * 10) / 10;
 
-      // Add date/time to temperature
-      var jsonData = [Date.now(), temp];
+      // Convert temp to Fahrenheit
+      //temp = (temp * 1.8000) + 32.00;
 
-      // Return JSON data
-      response.writeHead(200, { "Content-type": "application/json" });
-      response.end(JSON.stringify(jsonData), "ascii");
-      // Log to console (debugging)
-      // console.log('returned JSON data: ' + jsonData);
 
-      });
-    }
-    else {
+    } else {
       // Print requested file to terminal
       util.puts('Request from '.blue + (request.connection.remoteAddress + '').magenta +
                 ' for: '.blue + (pathfile + '').yellow);
@@ -139,11 +127,14 @@ var server = http.createServer(
     }
 });
 
+// start polling the temp sensor
+//pollSensor(TEMP_SENSOR_ID1);
+
 // Enable server
 server.listen(port);
 
 // resolve the device IP, then display server started message
-getNetworkIP(function (error, ip) {
+networkIp.getNetworkIP(function (error, ip) {
   var ipAddress = ip;
 
   // if IP address can't be found, just show 'localhost'
