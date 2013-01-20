@@ -34,7 +34,8 @@
 
     });
 
-    setTimeout(getSensorData, 1000);
+    // poll server again in 5 minutes
+    setTimeout(getSensorData, ((1000 * 60) * 5));
 
   }
 

@@ -31,7 +31,8 @@ dbclient.on('error', function (err) {
 // TODO: lookup sensors automatically
 //var TEMP_SENSOR_ID = 'dev-temp-sensor'; // test sensor
 //var TEMP_SENSOR_ID = '28-00000418941a'; // DS18B20 (bare)
-var TEMP_SENSOR_ID = '28-000002aa9557'; // DS18B20 (silver thermowell)
+//var TEMP_SENSOR_ID = '28-000002aa9557'; // DS18B20 (silver thermowell)
+var TEMP_SENSOR_ID = '28-0000047505a4'; // DS18B20 (black plastic cap)
 
 // Use node-static module to serve chart for client-side dynamic graph
 var nodestatic = require('node-static'),
@@ -67,8 +68,8 @@ function pollSensor() {
     // write sensor data to Redis DB
     dbclient.zadd(TEMP_SENSOR_ID, timeNow.valueOf(), JSON.stringify(readingData));
 
-    // poll the temp sensor again after 1 second
-    setTimeout(pollSensor, 1000);
+    // poll the temp sensor again after 1 minute
+    setTimeout(pollSensor, (1000 * 60));
 
   });
 }
@@ -83,8 +84,7 @@ var lastRequestTime = moment().subtract('hours', 1);
 // Setup node http server
 var server = http.createServer(
   // Our main server function
-  function(request, response)
-  {
+  function(request, response) {
     // Grab the URL requested by the client
     var url = require('url').parse(request.url),
         pathfile = url.pathname,
@@ -97,7 +97,7 @@ var server = http.createServer(
       util.puts('Request from '.blue + (request.connection.remoteAddress + '').magenta +
                 ' for: '.blue + (pathfile + '').yellow);
 
-      dbclient.zrevrangebyscore([TEMP_SENSOR_ID, '+inf', '-inf', 'LIMIT', 0, 350], function (err, res) {
+      dbclient.zrevrangebyscore([TEMP_SENSOR_ID, '+inf', '-inf', 'LIMIT', 0, 150], function (err, res) {
 
         var temp, resParsed, resData = [];
 
