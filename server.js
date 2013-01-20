@@ -99,21 +99,17 @@ var server = http.createServer(
       util.puts('Request from '.blue + (request.connection.remoteAddress + '').magenta +
                 ' for: '.blue + (pathfile + '').yellow);
 
+      dbclient.zrangebyscore([TEMP_SENSOR_ID, lastRequestTime.valueOf(), moment().valueOf()], function (err, res) {
 
-      console.log('get recent entries: ' + lastRequestTime.valueOf());
-        dbclient.zrangebyscore([TEMP_SENSOR_ID, lastRequestTime.valueOf(), moment().valueOf()], function (err, res) {
-        var i, temp, resParsed, resData = [];
+        var temp, resParsed, resData = [];
 
-        console.log('results: ', res);
+        //console.log('results: ', res);
 
-        for (var reading in res) {
-          if (res.hasOwnProperty(reading)) {
-            resParsed = JSON.parse(reading);
+        for ( var i = 0, l = res.length; i < l; i = i + 1 ) {
+            resParsed = JSON.parse(res[i]);
             resParsed.value = Math.round(resParsed.value / 1000.0) / 10;
             resData.push(resParsed);
-          }
         }
-
 
         response.writeHead(200, { "Content-type": "application/json" });
         if (!res) {
@@ -121,10 +117,8 @@ var server = http.createServer(
         }
         response.end(JSON.stringify(resData), "ascii");
 
-
         lastRequestTime = moment();
-        console.log('new request time: ' + lastRequestTime);
-        //dbclient.quit();
+
       });
 
 

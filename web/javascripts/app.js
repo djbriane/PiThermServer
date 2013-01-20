@@ -13,19 +13,26 @@
     $.getJSON('./temperature.json', function(data) {
       console.log(data);
 
-      graph = window.Morris.Line({
-        element: 'line-example',
-        data: data,
-        xkey: 'time',
-        ykeys: ['value'],
-        labels: ['Sensor 1'],
-        xLabels: '5min',
-        ymin: 'auto',
-        ymax: 'auto',
-        hideHover: true,
-        postUnits: '°',
-        dateFormat: function (x) { return new window.moment(x).fromNow(); }
-      });
+      if (data) {
+        if (!graph) {
+          graph = window.Morris.Line({
+            element: 'line-example',
+            data: data,
+            xkey: 'time',
+            ykeys: ['value'],
+            labels: ['Sensor 1'],
+            xLabels: '5min',
+            ymin: 'auto',
+            ymax: 'auto',
+            hideHover: true,
+            postUnits: '°',
+            dateFormat: function (x) { return new window.moment(x).fromNow(); }
+          });
+        } else {
+          graph.setData(data);
+        }
+      }
+
     });
 
     setTimeout(getSensorData, 1000);
