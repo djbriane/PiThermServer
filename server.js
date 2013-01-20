@@ -20,6 +20,8 @@ var networkIp = require('./networkip.js');
 var redis = require('redis'),
     dbclient = redis.createClient();
 
+dbclient.auth('foobared');
+
 dbclient.on('error', function (err) {
     console.error('Redis Error ' + err);
 });
@@ -28,6 +30,8 @@ dbclient.on('error', function (err) {
 // to list available sensors, enter 'ls /sys/bus/w1/devices/'
 // TODO: lookup sensors automatically
 //var TEMP_SENSOR_ID1 = '28-00000418941a'; // DS18B20 (bare)
+//var TEMP_SENSOR_ID2 = '28-000002aa9557'; // DS18B20 (silver thermowell)
+
 var TEMP_SENSOR_ID1 = 'dev-temp-sensor'; // test sensor
 
 
@@ -46,8 +50,7 @@ function pollSensor(sensorId) {
     var data;
 
     if (err) {
-      response.writeHead(500, { "Content-type": "text/html" });
-      response.end(err + "\n");
+      console.error('Error reading sensor data: ', err);
       return;
     }
 
@@ -66,12 +69,15 @@ function pollSensor(sensorId) {
   // write sensor data to Redis DB
   dbclient.zadd(sensorId, timeNow.valueOf(), JSON.stringify(readingData), redis.print);
 
-  dbclient.quit();
+  //dbclient.quit();
 }
 
 
 // Setup static server for current directory
-var staticServer = new nodestatic.Server(".");
+var staticServer = new nodestatic.Server("./web/");
+var lastRequestTime = moment().subtract('hours', 1);
+
+console.log('initial request time: ' + lastRequestTime);
 
 // Setup node http server
 var server = http.createServer(
@@ -85,15 +91,37 @@ var server = http.createServer(
 
     // Test to see if it's a request for temperature data
     if (pathfile === '/temperature.json') {
-      dbclient.zrangebyscore([TEMP_SENSOR_ID1, moment().subtract('hours', 1).valueOf(), moment().valueOf()], function (err, res) {
-        console.log('temp data: ', JSON.stringify(res));
+
+      // Print requested file to terminal
+      util.puts('Request from '.blue + (request.connection.remoteAddress + '').magenta +
+                ' for: '.blue + (pathfile + '').yellow);
+
+
+      console.log('get recent entries: ' + lastRequestTime);
+      //dbclient.zrangebyscore([TEMP_SENSOR_ID1, lastRequestTime.valueOf(), moment().valueOf()], function (err, res) {
+        dbclient.zrangebyscore([TEMP_SENSOR_ID1, 'lastRequestTime.valueOf()', moment().valueOf()], function (err, res) {
+        var i, temp, resParsed, resData = [];
+
+        console.log('results: ', res);
+
+        for (var reading in res) {
+          if (res.hasOwnProperty(reading)) {
+            resParsed = JSON.parse(reading);
+            resParsed.value = Math.round(resParsed.value / 1000.0) / 10;
+            resData.push(resParsed);
+          }
+        }
+
 
         response.writeHead(200, { "Content-type": "application/json" });
         if (!res) {
           res = [];
         }
-        response.end(JSON.stringify(res), "ascii");
+        response.end(JSON.stringify(resData), "ascii");
 
+
+        lastRequestTime = moment();
+        console.log('new request time: ' + lastRequestTime);
         //dbclient.quit();
       });
 
@@ -128,7 +156,7 @@ var server = http.createServer(
 });
 
 // start polling the temp sensor
-//pollSensor(TEMP_SENSOR_ID1);
+setTimeout(pollSensor(TEMP_SENSOR_ID1), 1000);
 
 // Enable server
 server.listen(port);
