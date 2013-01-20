@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+
+<!-- paulirish.com/2008/conditional-stylesheets-vs-css-hacks-answer-neither/ -->
+<!--[if IE 8]>    <html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8" />
+
+  <!-- Set the viewport width to device width for mobile -->
+  <meta name="viewport" content="width=device-width" />
+
+  <title>PiThermServer</title>
+
+  <!-- Included CSS Files (Uncompressed) -->
+  <!--
+  <link rel="stylesheet" href="stylesheets/foundation.css">
+  -->
+
+  <!-- Included CSS Files (Compressed) -->
+  <link rel="stylesheet" href="stylesheets/foundation.min.css">
+  <link rel="stylesheet" href="stylesheets/app.css">
+
+  <script src="javascripts/modernizr.foundation.js"></script>
+</head>
+<body>
+
+  <div class="row">
+    <div class="twelve columns">
+      <h2>Raspberry Pi Therm Server</h2>
+      <hr />
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="eight columns">
+      <h3>Sensor 1</h3>
+
+      <!-- Grid Example -->
+      <div class="row">
+        <div class="twelve columns">
+          <div class="panel">
+            <div id="line-example"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="four columns">
+      <h4>About</h4>
+      <p>Displays time-series sensor data for DS18B20 temperature sensors hooked up to a Raspberry Pi.</p>
+    </div>
+  </div>
+
+  <!-- Included JS Files (Compressed) -->
+  <script src="javascripts/foundation.min.js"></script>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
+  <script src="https://raw.github.com/oesmith/morris.js/0.3.2/morris.js"></script>
+  <script src="javascripts/moment.min.js"></script>
+
+  <!-- Initialize JS Plugins -->
+  <script src="javascripts/app.js"></script>
+
+</body>
+</html>
