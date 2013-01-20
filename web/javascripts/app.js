@@ -4,7 +4,7 @@
   var $doc = $(document),
       Modernizr = window.Modernizr;
 
-  var graph;
+  var graph, sensorData = [];
 
   // Get data from Pi NodeJS server
   function getSensorData() {
@@ -13,23 +13,25 @@
     $.getJSON('./temperature.json', function(data) {
       console.log(data);
 
-      if (data) {
+      if (data && data.length > 0) {
+        sensorData.push(data);
+        console.log(sensorData);
         if (!graph) {
           graph = window.Morris.Line({
             element: 'line-example',
-            data: data,
+            data: sensorData,
             xkey: 'time',
             ykeys: ['value'],
             labels: ['Sensor 1'],
-            xLabels: '5min',
-            ymin: 'auto',
-            ymax: 'auto',
+            xLabels: '1min',
+            ymin: 60.0,
+            ymax: 90.0,
             hideHover: true,
             postUnits: '°',
             dateFormat: function (x) { return new window.moment(x).fromNow(); }
           });
         } else {
-          graph.setData(data);
+          graph.setData(sensorData);
         }
       }
 

@@ -99,7 +99,7 @@ var server = http.createServer(
       util.puts('Request from '.blue + (request.connection.remoteAddress + '').magenta +
                 ' for: '.blue + (pathfile + '').yellow);
 
-      dbclient.zrangebyscore([TEMP_SENSOR_ID, lastRequestTime.valueOf(), moment().valueOf()], function (err, res) {
+      dbclient.zrevrangebyscore([TEMP_SENSOR_ID, '+inf', '-inf', 'LIMIT', 0, 350], function (err, res) {
 
         var temp, resParsed, resData = [];
 
@@ -107,7 +107,17 @@ var server = http.createServer(
 
         for ( var i = 0, l = res.length; i < l; i = i + 1 ) {
             resParsed = JSON.parse(res[i]);
-            resParsed.value = Math.round(resParsed.value / 1000.0) / 10;
+
+            temp = parseFloat(resParsed.value)/1000.00;
+
+            // Round to one decimal place
+            temp = Math.round(temp * 10) / 10;
+
+            // Convert temp to Fahrenheit
+            temp = (temp * 1.8000) + 32.00;
+
+            resParsed.value = temp;
+
             resData.push(resParsed);
         }
 
