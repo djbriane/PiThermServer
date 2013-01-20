@@ -12,14 +12,11 @@
     console.log('get sensor data');
     $.getJSON('./temperature.json', function(data) {
       console.log(data);
-
       if (data && data.length > 0) {
-        sensorData.push(data);
-        console.log(sensorData);
         if (!graph) {
           graph = window.Morris.Line({
             element: 'line-example',
-            data: sensorData,
+            data: data,
             xkey: 'time',
             ykeys: ['value'],
             labels: ['Sensor 1'],
@@ -31,7 +28,7 @@
             dateFormat: function (x) { return new window.moment(x).fromNow(); }
           });
         } else {
-          graph.setData(sensorData);
+          graph.setData(data);
         }
       }
 

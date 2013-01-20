@@ -62,10 +62,10 @@ function pollSensor() {
     timeNow = moment();
     readingData = { time: timeNow.valueOf(), value: sensorValue };
 
-    console.log('sensor reading data: ', JSON.stringify(readingData));
+    //console.log('sensor reading data: ', JSON.stringify(readingData));
 
     // write sensor data to Redis DB
-    dbclient.zadd(TEMP_SENSOR_ID, timeNow.valueOf(), JSON.stringify(readingData), redis.print);
+    dbclient.zadd(TEMP_SENSOR_ID, timeNow.valueOf(), JSON.stringify(readingData));
 
     // poll the temp sensor again after 1 second
     setTimeout(pollSensor, 1000);
@@ -79,8 +79,6 @@ pollSensor();
 // Setup static server for current directory
 var staticServer = new nodestatic.Server("./web/");
 var lastRequestTime = moment().subtract('hours', 1);
-
-console.log('initial request time: ' + lastRequestTime);
 
 // Setup node http server
 var server = http.createServer(
