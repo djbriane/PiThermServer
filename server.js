@@ -100,8 +100,8 @@ var server = http.createServer(
                 ' for: '.blue + (pathfile + '').yellow);
 
 
-      console.log('get recent entries: ' + lastRequestTime);
-        dbclient.zrangebyscore([TEMP_SENSOR_ID, 'lastRequestTime.valueOf()', moment().valueOf()], function (err, res) {
+      console.log('get recent entries: ' + lastRequestTime.valueOf());
+        dbclient.zrangebyscore([TEMP_SENSOR_ID, lastRequestTime.valueOf(), moment().valueOf()], function (err, res) {
         var i, temp, resParsed, resData = [];
 
         console.log('results: ', res);
