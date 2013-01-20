@@ -47,8 +47,6 @@ function pollSensor() {
 
     var data;
 
-    console.log('file read buffer: ', buffer);
-
     if (err) {
       console.error('Error reading sensor data: ', err);
       return;
@@ -61,21 +59,22 @@ function pollSensor() {
       sensorValue = parseFloat(data[data.length - 1].split('=')[1]);
     }
 
+    timeNow = moment();
+    readingData = { time: timeNow.valueOf(), value: sensorValue };
+
+    console.log('sensor reading data: ', JSON.stringify(readingData));
+
+    // write sensor data to Redis DB
+    dbclient.zadd(TEMP_SENSOR_ID, timeNow.valueOf(), JSON.stringify(readingData), redis.print);
+
+    // poll the temp sensor again after 1 second
+    setTimeout(pollSensor, 1000);
+
   });
-
-  timeNow = moment();
-  readingData = { time: timeNow.valueOf(), value: sensorValue };
-
-  console.log('sensor reading data: ', readingData);
-
-  // write sensor data to Redis DB
-  dbclient.zadd(TEMP_SENSOR_ID, timeNow.valueOf(), JSON.stringify(readingData), redis.print);
-
-  //dbclient.quit();
-  // start polling the temp sensor
-  setTimeout(pollSensor, 1000);
 }
 
+// start polling the temp sensor
+pollSensor();
 
 // Setup static server for current directory
 var staticServer = new nodestatic.Server("./web/");
@@ -102,8 +101,7 @@ var server = http.createServer(
 
 
       console.log('get recent entries: ' + lastRequestTime);
-      //dbclient.zrangebyscore([TEMP_SENSOR_ID1, lastRequestTime.valueOf(), moment().valueOf()], function (err, res) {
-        dbclient.zrangebyscore([TEMP_SENSOR_ID1, 'lastRequestTime.valueOf()', moment().valueOf()], function (err, res) {
+        dbclient.zrangebyscore([TEMP_SENSOR_ID, 'lastRequestTime.valueOf()', moment().valueOf()], function (err, res) {
         var i, temp, resParsed, resData = [];
 
         console.log('results: ', res);
@@ -159,8 +157,7 @@ var server = http.createServer(
     }
 });
 
-// start polling the temp sensor
-pollSensor();
+
 
 // Enable server
 server.listen(port);
