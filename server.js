@@ -20,7 +20,7 @@ var networkIp = require('./networkip.js');
 var redis = require('redis'),
     dbclient = redis.createClient();
 
-dbclient.auth('foobared');
+//dbclient.auth('foobared');
 
 dbclient.on('error', function (err) {
     console.error('Redis Error ' + err);
@@ -29,25 +29,25 @@ dbclient.on('error', function (err) {
 // define sensor serial number (will be different for each sensor)
 // to list available sensors, enter 'ls /sys/bus/w1/devices/'
 // TODO: lookup sensors automatically
-//var TEMP_SENSOR_ID1 = '28-00000418941a'; // DS18B20 (bare)
-//var TEMP_SENSOR_ID2 = '28-000002aa9557'; // DS18B20 (silver thermowell)
-
-var TEMP_SENSOR_ID1 = 'dev-temp-sensor'; // test sensor
-
+//var TEMP_SENSOR_ID = 'dev-temp-sensor'; // test sensor
+//var TEMP_SENSOR_ID = '28-00000418941a'; // DS18B20 (bare)
+var TEMP_SENSOR_ID = '28-000002aa9557'; // DS18B20 (silver thermowell)
 
 // Use node-static module to serve chart for client-side dynamic graph
 var nodestatic = require('node-static'),
     port = process.env.PORT || 8000;
 
 // start polling the temp sensor and save to DB
-function pollSensor(sensorId) {
+function pollSensor() {
   var readingData, sensorValue;
 
   // Function to read thermal sensor and return JSON representation of first word (i.e. the data)
   // Note device location is sensor specific.
-  fs.readFile('/sys/bus/w1/devices/' + sensorId + '/w1_slave', function(err, buffer) {
+  fs.readFile('/sys/bus/w1/devices/' + TEMP_SENSOR_ID + '/w1_slave', function(err, buffer) {
 
     var data;
+
+    console.log('file read buffer: ', buffer);
 
     if (err) {
       console.error('Error reading sensor data: ', err);
@@ -66,10 +66,14 @@ function pollSensor(sensorId) {
   timeNow = moment();
   readingData = { time: timeNow.valueOf(), value: sensorValue };
 
+  console.log('sensor reading data: ', readingData);
+
   // write sensor data to Redis DB
-  dbclient.zadd(sensorId, timeNow.valueOf(), JSON.stringify(readingData), redis.print);
+  dbclient.zadd(TEMP_SENSOR_ID, timeNow.valueOf(), JSON.stringify(readingData), redis.print);
 
   //dbclient.quit();
+  // start polling the temp sensor
+  setTimeout(pollSensor, 1000);
 }
 
 
@@ -156,7 +160,7 @@ var server = http.createServer(
 });
 
 // start polling the temp sensor
-setTimeout(pollSensor(TEMP_SENSOR_ID1), 1000);
+pollSensor();
 
 // Enable server
 server.listen(port);
