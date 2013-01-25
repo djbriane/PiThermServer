@@ -19,13 +19,13 @@
             data: data,
             xkey: 'time',
             ykeys: ['value'],
-            labels: ['Sensor 1'],
-            xLabels: '1min',
-            ymin: 60.0,
-            ymax: 90.0,
+            labels: ['Temp Sensor'],
+            xLabels: '5min',
+            ymin: 'auto 69.0',
+            ymax: 'auto 73.0',
             hideHover: true,
             postUnits: '°',
-            dateFormat: function (x) { return new window.moment(x).fromNow(); }
+            dateFormat: function (x) { return new window.moment(x).format('MMM Do, h:mm:ss a'); }
           });
         } else {
           graph.setData(data);
