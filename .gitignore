@@ -2,3 +2,6 @@
 
 # node specific ignores
 node_modules/
+
+# python specific ignores
+*.pyc

@@ -34,6 +34,6 @@ while 1:
         lcd.clear()
         #ipaddr = run_cmd(cmd)
         lcd.message(datetime.now().strftime('%b %d  %H:%M:%S\n'))
-        lcd.message("Temp: %0.1f° F" % sensorReadingF)
+        lcd.message("Temp: %0.1f F" % sensorReadingF)
         #lcd.message('IP %s' % ( ipaddr ) )
         sleep(60)
