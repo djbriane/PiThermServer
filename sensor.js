@@ -60,8 +60,6 @@ function pollSensor() {
       value: sensorValue
     };
 
-    //console.log('sensor reading data: ', JSON.stringify(readingData));
-
     // write sensor data to Redis DB
     dbclient.zadd(TEMP_SENSOR_ID, timeNow.valueOf(), JSON.stringify(readingData));
 
@@ -70,8 +68,8 @@ function pollSensor() {
     temp = (temp * 1.8000) + 32.00;
 
     // Log message
-    util.puts('Sensor reading: ' + (temp + '').yellow +
-      'F at ' + timeNow.format('MMMM Do YYYY, h:mm:ss a').blue);
+    util.puts('Sensor reading: ' + (temp + ' F').yellow +
+      ' on ' + timeNow.format('MMMM Do YYYY, h:mm:ss a').blue);
 
     // poll the temp sensor again after 1 minute
     setTimeout(pollSensor, (1000 * 60));

@@ -7,26 +7,26 @@
 
 // Load node module dependencies
 var fs = require('fs'),
-    sys = require('sys'),
-    http = require('http'),
-    util = require('util'),
-    colors = require('colors'),
-    moment = require('moment');
+  sys = require('sys'),
+  http = require('http'),
+  util = require('util'),
+  colors = require('colors'),
+  moment = require('moment');
 
 // Load local modules
 var networkIp = require('./networkip.js');
 
 // redis DB setup
 var redis = require('redis'),
-    dbclient = redis.createClient();
+  dbclient = redis.createClient();
 
-dbclient.on('error', function (err) {
-    console.error('Redis Error ' + err);
+dbclient.on('error', function(err) {
+  console.error('Redis Error ' + err);
 });
 
 // Use node-static module to serve chart for client-side dynamic graph
 var nodestatic = require('node-static'),
-    port = process.env.PORT || 8000;
+  port = process.env.PORT || 8000;
 
 // Setup static server for current directory
 var staticServer = new nodestatic.Server("./web/");
@@ -34,87 +34,92 @@ var lastRequestTime = moment().subtract('hours', 1);
 
 // Setup node http server
 var server = http.createServer(
-  // Our main server function
-  function(request, response) {
-    // Grab the URL requested by the client
-    var url = require('url').parse(request.url),
-        pathfile = url.pathname,
-        tempData;
+// Our main server function
 
-    // Test to see if it's a request for temperature data
-    if (pathfile === '/temperature.json') {
+function(request, response) {
+  // Grab the URL requested by the client
+  var url = require('url').parse(request.url),
+    pathfile = url.pathname,
+    tempData;
 
-      // Print requested file to terminal
-      util.puts('Request from '.blue + (request.connection.remoteAddress + '').magenta +
-                ' for: '.blue + (pathfile + '').yellow);
+  // Test to see if it's a request for temperature data
+  if (pathfile === '/temperature.json') {
 
-      dbclient.zrevrangebyscore([TEMP_SENSOR_ID, '+inf', '-inf', 'LIMIT', 0, 150], function (err, res) {
+    // Print requested file to terminal
+    util.puts('[' + timeNow.format('MMMM Do YYYY, h:mm:ss a').blue +
+      '] Request from ' + (request.connection.remoteAddress + '').magenta +
+      ' for: ' + (pathfile + '').yellow);
 
-        var temp, resParsed, resData = [];
+    dbclient.zrevrangebyscore([TEMP_SENSOR_ID, '+inf', '-inf', 'LIMIT', 0, 150], function(err, res) {
 
-        //console.log('results: ', res);
+      var temp, resParsed, resData = [];
 
-        for ( var i = 0, l = res.length; i < l; i = i + 1 ) {
-            resParsed = JSON.parse(res[i]);
+      //console.log('results: ', res);
 
-            temp = parseFloat(resParsed.value)/1000.00;
+      for (var i = 0, l = res.length; i < l; i = i + 1) {
+        resParsed = JSON.parse(res[i]);
 
-            // Round to one decimal place
-            temp = Math.round(temp * 10) / 10;
+        temp = parseFloat(resParsed.value) / 1000.00;
 
-            // Convert temp to Fahrenheit
-            temp = (temp * 1.8000) + 32.00;
+        // Round to one decimal place
+        temp = Math.round(temp * 10) / 10;
 
-            resParsed.value = temp;
+        // Convert temp to Fahrenheit
+        temp = (temp * 1.8000) + 32.00;
 
-            resData.push(resParsed);
-        }
+        resParsed.value = temp;
 
-        response.writeHead(200, { "Content-type": "application/json" });
-        if (!res) {
-          res = [];
-        }
-        response.end(JSON.stringify(resData), "ascii");
+        resData.push(resParsed);
+      }
 
-        lastRequestTime = moment();
-
+      response.writeHead(200, {
+        "Content-type": "application/json"
       });
+      if (!res) {
+        res = [];
+      }
+      response.end(JSON.stringify(resData), "ascii");
+
+      lastRequestTime = moment();
+
+    });
 
 
-      // Extract temperature from string and divide by 1000 to give celsius
-      //var temp  = parseFloat(data[data.length-1].split("=")[1])/1000.0;
+    // Extract temperature from string and divide by 1000 to give celsius
+    //var temp  = parseFloat(data[data.length-1].split("=")[1])/1000.0;
 
-      // Round to one decimal place
-      //temp = Math.round(temp * 10) / 10;
+    // Round to one decimal place
+    //temp = Math.round(temp * 10) / 10;
 
-      // Convert temp to Fahrenheit
-      //temp = (temp * 1.8000) + 32.00;
+    // Convert temp to Fahrenheit
+    //temp = (temp * 1.8000) + 32.00;
 
 
-    } else {
-      // Print requested file to terminal
-      util.puts('Request from '.blue + (request.connection.remoteAddress + '').magenta +
-                ' for: '.blue + (pathfile + '').yellow);
+  } else {
+    // Print requested file to terminal
+    util.puts('[' + timeNow.format('MMMM Do YYYY, h:mm:ss a').blue +
+      '] Request from ' + (request.connection.remoteAddress + '').magenta +
+      ' for: ' + (pathfile + '').yellow);
 
-      // Serve file using node-static
-      staticServer.serve(request, response, function (err, result) {
-        if (err){
-          // Log the error
-          sys.error("Error serving " + request.url + " - " + err.message);
+    // Serve file using node-static
+    staticServer.serve(request, response, function(err, result) {
+      if (err) {
+        // Log the error
+        sys.error("Error serving " + request.url + " - " + err.message);
 
-          // Respond to the client
-          response.writeHead(err.status, err.headers);
-          response.end('Error 404 - file not found');
-        }
-      });
-    }
+        // Respond to the client
+        response.writeHead(err.status, err.headers);
+        response.end('Error 404 - file not found');
+      }
+    });
+  }
 });
 
 // Enable server
 server.listen(port);
 
 // resolve the device IP, then display server started message
-networkIp.getNetworkIP(function (error, ip) {
+networkIp.getNetworkIP(function(error, ip) {
   var ipAddress = ip;
 
   // if IP address can't be found, just show 'localhost'
@@ -124,8 +129,7 @@ networkIp.getNetworkIP(function (error, ip) {
   }
 
   // Log message
-  util.puts('HTTP server '.blue + 'started'.green + ' at '.blue +
-            ('http://' + ipAddress + ':' + port).yellow);
+  util.puts('[' + timeNow.format('MMMM Do YYYY, h:mm:ss a').blue + 
+    '] HTTP server ' + 'started'.green + ' at ' + ('http://' + ipAddress + ':' + port).yellow);
 
 }, false);
-
