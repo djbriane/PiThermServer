@@ -24,6 +24,14 @@ dbclient.on('error', function(err) {
   console.error('Redis Error ' + err);
 });
 
+// define sensor serial number (will be different for each sensor)
+// to list available sensors, enter 'ls /sys/bus/w1/devices/'
+// TODO: lookup sensors automatically
+//var TEMP_SENSOR_ID = 'dev-temp-sensor'; // test sensor
+//var TEMP_SENSOR_ID = '28-00000418941a'; // DS18B20 (bare)
+//var TEMP_SENSOR_ID = '28-000002aa9557'; // DS18B20 (silver thermowell)
+var TEMP_SENSOR_ID = '28-0000047505a4'; // DS18B20 (black plastic cap)
+
 // Use node-static module to serve chart for client-side dynamic graph
 var nodestatic = require('node-static'),
   port = process.env.PORT || 8000;
