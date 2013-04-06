@@ -21,12 +21,13 @@
             ykeys: ['value'],
             labels: ['Temp Sensor'],
             xLabels: '5min',
-            ymin: 'auto 60.0',
+            ymin: 'auto',
             ymax: 'auto',
             hideHover: 'auto',
             postUnits: '°',
-	    goals: [60.0, 72.0],
-	    goalLineColors: ['#00ff00'],
+            pointSize: 0,
+            goals: [60.0, 72.0],
+            goalLineColors: ['#00ff00'],
             dateFormat: function (x) { return new window.moment(x).format('MMM Do, h:mm:ss a'); }
           });
         } else {
