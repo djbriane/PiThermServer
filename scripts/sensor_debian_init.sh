@@ -38,13 +38,9 @@
 # Required-Stop:     $remote_fs $named $syslog
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: DEBIAN initscript for node.js servers/apps
-# Description:       ex : proxy server is a node.js http server listening on
-#                    port 8080 (relayed from 80 by iptables). It balances
-#                    http requests between the main nodejs server 
-#                    (nodejs.mydomain.com:8000), the static file-server 
-#                    (static.mydomain.com) and the legacy apache server
-#                    (apache.mydomain.com) and possibly other servers
+# Short-Description: DEBIAN initscript for node.js temp sensor polling
+# Description:       PiThermServer sensor polling script for checking external 
+#                    temperature sensor and writing to a REDIS data store.
 #                    place this file in /etc/init.d.
 ### END INIT INFO
 
