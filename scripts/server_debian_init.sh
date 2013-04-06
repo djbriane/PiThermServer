@@ -33,7 +33,7 @@
 #      modified by : Peter Host (www.oghme.com)
 # ______________________________________________________________________________ 
 ### BEGIN INIT INFO
-# Provides:          node_therm_server_init
+# Provides:          pi_therm_server
 # Required-Start:    $remote_fs $named $syslog node_therm_sensor_init
 # Required-Stop:     $remote_fs $named $syslog
 # Default-Start:     2 3 4 5
@@ -70,6 +70,8 @@ LOCAL_VAR_RUN=/usr/local/var/run            # in case the init script is run by 
 
 NAME=node                                   # name of the node.js executable
 DAEMON=/usr/local/bin/$NAME                 # this SHOULD POINT TO where your node executable is
+
+#UID=${UID:="1000"}
 #
 #                                                                              #
 #                   END </MODIFY TO REFLECT YOUR SETTINGS>                     #
@@ -139,7 +141,7 @@ do_stop()
   #   1 if daemon was already stopped
   #   2 if daemon could not be stopped
   #   other if a failure occurred
-  start-stop-daemon --stop --quiet --retry=TERM/30/KILL/5 --pidfile $PIDFILE  --chuid $NODEUSER --name $DAEMON
+  start-stop-daemon --stop --quiet --retry=TERM/30/KILL/5 --pidfile $PIDFILE  --chuid $NODEUSER --exec $DAEMON
   RETVAL="$?"
   #[ "$VERBOSE" != no ] && [ "$RETVAL" = 1 ] && log_daemon_msg  "  --->  SIGKILL failed => hardkill $DESC" "$INIT_SCRIPT_NAME_NOEXT"
   [ "$RETVAL" = 2 ] && return 2
@@ -167,7 +169,7 @@ do_reload() {
   # restarting (for example, when it is sent a SIGHUP),
   # then implement that here.
   #
-  start-stop-daemon --stop --quiet --signal 1 --pidfile $PIDFILE  --chuid $NODEUSER --name $NAME
+  start-stop-daemon --stop --quiet --signal 1 --pidfile $PIDFILE  --chuid $NODEUSER --exec $NAME
   return 0
 }
 

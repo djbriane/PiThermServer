@@ -37,7 +37,7 @@ var nodestatic = require('node-static'),
   port = process.env.PORT || 8000;
 
 // Setup static server for current directory
-var staticServer = new nodestatic.Server("./web/");
+var staticServer = new nodestatic.Server("/home/pi/PiThermServer/web/");
 var lastRequestTime = moment().subtract('hours', 1);
 
 // Setup node http server
