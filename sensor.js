@@ -68,8 +68,7 @@ function pollSensor() {
     temp = (temp * 1.8000) + 32.00;
 
     // Log message
-    util.puts('Sensor reading: ' + (temp + ' F').yellow +
-      ' on ' + timeNow.format('MMMM Do YYYY, h:mm:ss a').blue);
+    util.puts('[' + timeNow.format('MMMM Do YYYY, h:mm:ss a').blue + '] Sensor reading: ' + (temp + ' F').yellow);
 
     // poll the temp sensor again after 1 minute
     setTimeout(pollSensor, (1000 * 60));
