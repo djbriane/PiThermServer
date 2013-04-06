@@ -37,7 +37,7 @@ function pollSensor() {
   // Note device location is sensor specific.
   fs.readFile('/sys/bus/w1/devices/' + TEMP_SENSOR_ID + '/w1_slave', function(err, buffer) {
 
-    var data;
+    var data, temp;
 
     if (err) {
       console.error('Error reading sensor data: ', err);
@@ -49,6 +49,9 @@ function pollSensor() {
 
     if (data) {
       sensorValue = parseFloat(data[data.length - 1].split('=')[1]);
+    } else {
+      console.error('Error parsing sensor data!');
+      return;
     }
 
     timeNow = moment();
@@ -62,9 +65,13 @@ function pollSensor() {
     // write sensor data to Redis DB
     dbclient.zadd(TEMP_SENSOR_ID, timeNow.valueOf(), JSON.stringify(readingData));
 
+    temp = parseFloat(sensorValue)/1000.00;
+    temp = Math.round(temp * 10) / 10;
+    temp = (temp * 1.8000) + 32.00;
+
     // Log message
-    util.puts('Sensor reading: ' + sensorValue.yellow +
-      ' at ' + timeNow.format('MMMM Do YYYY, h:mm:ss a').blue);
+    util.puts('Sensor reading: ' + (temp + '').yellow +
+      'F at ' + timeNow.format('MMMM Do YYYY, h:mm:ss a').blue);
 
     // poll the temp sensor again after 1 minute
     setTimeout(pollSensor, (1000 * 60));
