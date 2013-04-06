@@ -33,8 +33,8 @@
 #      modified by : Peter Host (www.oghme.com)
 # ______________________________________________________________________________ 
 ### BEGIN INIT INFO
-# Provides:          node_debian_init
-# Required-Start:    $remote_fs $named $syslog
+# Provides:          node_therm_server_init
+# Required-Start:    $remote_fs $named $syslog node_therm_sensor_init
 # Required-Stop:     $remote_fs $named $syslog
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
@@ -56,7 +56,7 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/bin # modify if you need
 DAEMON_ARGS="/home/pi/PiThermServer/server.js"        # path to your node.js server/app
                                             # NB: don't use ~/ in path
 
-DESC="PiThermServer - http server"         # whatever fancy description you like
+DESC="PiThermServer http server"         # whatever fancy description you like
 
 NODEUSER=pi                                 # USER who OWNS the daemon process (no matter whoever runs the init script)
                                             # user:group (if no group is specified, the primary GID for that user is used)

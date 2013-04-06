@@ -33,7 +33,7 @@
 #      modified by : Peter Host (www.oghme.com)
 # ______________________________________________________________________________ 
 ### BEGIN INIT INFO
-# Provides:          node_debian_init
+# Provides:          node_therm_sensor_init
 # Required-Start:    $remote_fs $named $syslog
 # Required-Stop:     $remote_fs $named $syslog
 # Default-Start:     2 3 4 5

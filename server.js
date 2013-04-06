@@ -46,7 +46,7 @@ function(request, response) {
   if (pathfile === '/temperature.json') {
 
     // Print requested file to terminal
-    util.puts('[' + timeNow.format('MMMM Do YYYY, h:mm:ss a').blue +
+    util.puts('[' + moment().format('MMMM Do YYYY, h:mm:ss a').blue +
       '] Request from ' + (request.connection.remoteAddress + '').magenta +
       ' for: ' + (pathfile + '').yellow);
 
@@ -97,7 +97,7 @@ function(request, response) {
 
   } else {
     // Print requested file to terminal
-    util.puts('[' + timeNow.format('MMMM Do YYYY, h:mm:ss a').blue +
+    util.puts('[' + moment().format('MMMM Do YYYY, h:mm:ss a').blue +
       '] Request from ' + (request.connection.remoteAddress + '').magenta +
       ' for: ' + (pathfile + '').yellow);
 
@@ -129,7 +129,7 @@ networkIp.getNetworkIP(function(error, ip) {
   }
 
   // Log message
-  util.puts('[' + timeNow.format('MMMM Do YYYY, h:mm:ss a').blue + 
+  util.puts('[' + moment().format('MMMM Do YYYY, h:mm:ss a').blue +
     '] HTTP server ' + 'started'.green + ' at ' + ('http://' + ipAddress + ':' + port).yellow);
 
 }, false);
