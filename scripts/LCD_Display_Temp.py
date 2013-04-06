@@ -10,8 +10,8 @@ lcd = Adafruit_CharLCD()
 #cmd = "ip addr show wlan0 | grep inet | awk '{print $2}' | cut -d/ -f1"
 
 #sensorId = "28-00000418941a"  # bare
-#sensorId = "28-0000047505a4"  # black plastic
-sensorId = "28-000002aa9557"  # silver thermowell
+sensorId = "28-0000047505a4"  # black plastic
+#sensorId = "28-000002aa9557"  # silver thermowell
 
 lcd.begin(16, 1)
 
