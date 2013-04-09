@@ -65,14 +65,14 @@
         $('.graph-24hr').sparkline(sensorData24, sparkFormat);
 
         // setup data for 48hr graph
-        sensorData48 = _.filter(sensorData, function(val, index) {
+        sensorData48 = _.filter(data, function(val, index) {
           return (time48hrsago.isBefore(val.time) && index % 24 === 0);
         });
         sensorData48 = _.pluck(sensorData48, 'value').reverse();
         $('.graph-48hr').sparkline(sensorData48, sparkFormat);
 
-        $('.current-temp').text(Math.round(_first(data).value) + '°');
-
+        $('.current-temp').text(Math.round(_.first(data).value) + '°');
+        $('.current-temp-date span').text(window.moment(_.first(data).time).format('MMM Do, h:mm:ss a'));
       }
 
     });
