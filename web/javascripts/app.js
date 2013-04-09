@@ -8,16 +8,23 @@
 
   // Get data from Pi NodeJS server
   function getSensorData() {
-    var sensorData;
+    var sensorData, sensorData24, sensorData48, time12hrsago, time24hrsago, time48hrsago;
+
+    time12hrsago = new window.moment().subtract('hours', 12);
+    time24hrsago = new window.moment().subtract('hours', 24);
+    time48hrsago = new window.moment().subtract('hours', 48);
+
     console.log('get sensor data');
     $.getJSON('./temperature.json', function(data) {
       sensorData = data;
 
       if (data && data.length > 0) {
+        data = _.filter(data, function(val, index) { return (time12hrsago.isBefore(val.time) && index % 2 === 0); });
+
         if (!graph) {
           graph = window.Morris.Line({
             element: 'line-example',
-            data: _.sortBy(data, function(val) { return -val.time; }).slice(0,72),
+            data: data,
             xkey: 'time',
             ykeys: ['value'],
             labels: ['Temp Sensor'],
@@ -35,11 +42,30 @@
           graph.setData(data);
         }
 
-        sensorData = _.filter(sensorData, function(val, index) { return index % 6 === 0; });
-        sensorData = _.pluck(sensorData, 'value').reverse();
-        sensorData = _.filter(sensorData, function(num) { return (num > 50.0 && num < 90.0); });
+        sensorData24 = _.filter(sensorData, function(val, index) { return (time24hrsago.isBefore(val.time) && index % 6 === 0); });
+        sensorData24 = _.pluck(sensorData24, 'value').reverse();
+        sensorData24 = _.filter(sensorData24, function(num) { return (num > 50.0 && num < 90.0); });
 
-        $('.graph-24hr').sparkline(sensorData, {
+        sensorData48 = _.filter(sensorData, function(val, index) { return (time48hrsago.isBefore(val.time) && index % 12 === 0); });
+        sensorData48 = _.pluck(sensorData48, 'value').reverse();
+        sensorData48 = _.filter(sensorData48, function(num) { return (num > 50.0 && num < 90.0); });
+
+
+        $('.graph-24hr').sparkline(sensorData24, {
+          width: '100%',
+          height: '200px',
+          lineColor: '#0b62a4',
+          highlightLineColor: false,
+          fillColor: false,
+          spotRadius: 3,
+          normalRangeMax: 72.0,
+          normalRangeMin: 60.0,
+          lineWidth: 2,
+          tooltipSuffix: '°',
+          numberFormatter: function(val) {return Math.round(val);}
+        });
+
+        $('.graph-48hr').sparkline(sensorData48, {
           width: '100%',
           height: '200px',
           lineColor: '#0b62a4',
