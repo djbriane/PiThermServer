@@ -18,8 +18,20 @@
 /* -----------------------------------------
    Page Name 1
 ----------------------------------------- */
+.current-temp {
+  font-size: 50px;
+  font-weight: bold;
+}
 
 
+.current-temp-date {
+  font-weight: bold;
+  font-size: 8px;
+}
+
+.current-temp-date span {
+  font-weight: normal;
+}
 
 
 /* -----------------------------------------
