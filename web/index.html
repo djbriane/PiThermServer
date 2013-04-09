@@ -18,7 +18,7 @@
 
   <!-- Included CSS Files (Compressed) -->
   <link rel="stylesheet" href="stylesheets/foundation.min.css">
-<link rel="stylesheet" href="http://cdn.oesmith.co.uk/morris-0.4.1.min.css">
+  <link rel="stylesheet" href="http://cdn.oesmith.co.uk/morris-0.4.1.min.css">
   <link rel="stylesheet" href="stylesheets/app.css">
 
   <script src="javascripts/modernizr.foundation.js"></script>
@@ -35,33 +35,37 @@
   <div class="row">
 
     <div class="eight columns">
-      <h3>12 Hour</h3>
-
       <!-- Grid Example -->
       <div class="row">
         <div class="twelve columns">
           <div class="panel">
+            <h4>12 Hour</h4>
             <div id="line-example"></div>
           </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="six columns">
-          <h4>24 Hour</h4>
-          <p class="graph-24hr"></p>
-        </div>
-        <div class="six columns">
-          <h4>48 Hour</h4>
-          <p class="graph-48hr"></p>
         </div>
       </div>
     </div>
 
     <div class="four columns">
-      <h4>About</h4>
-      <p>Displays time-series sensor data for DS18B20 temperature sensors hooked up to a Raspberry Pi.</p>
+      <div class="panel">
+        <h4>24 Hour</h4>
+        <p class="graph-24hr"></p>
+      </div>
+      <div class="panel">
+        <h4>48 Hour</h4>
+        <p class="graph-48hr"></p>
+      </div>
     </div>
 
+  </div>
+
+  <div class="row">
+    <div class="twelve columns">
+      <div class="panel">
+        <h4>About</h4>
+        <p>Displays time-series sensor data for DS18B20 temperature sensors hooked up to a Raspberry Pi.</p>
+      </div>
+    </div>
   </div>
 
   <!-- Included JS Files (Compressed) -->
