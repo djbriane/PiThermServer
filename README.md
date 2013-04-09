@@ -28,6 +28,6 @@ http://www.cl.cam.ac.uk/freshers/raspberrypi/tutorials/temperature/
 
 Screenshots/Images
 ------------------
-![Temp Sensor Dashboard](dashboard_screen.png "Temp Sensor Dashboard")
+![Temp Sensor Dashboard](img_dashboard_screen.png "Temp Sensor Dashboard")
 
-![Homebrew Temp Monitor](dashboard_screen.png "Homebrew Temp Monitor")
+![Homebrew Temp Monitor](img_pitherm_beer.png "Homebrew Temp Monitor")
