@@ -30,4 +30,4 @@ Screenshots/Images
 ------------------
 ![Temp Sensor Dashboard](img_dashboard_screen.png "Temp Sensor Dashboard")
 
-![Homebrew Temp Monitor](img_pitherm_beer.png "Homebrew Temp Monitor")
+![Homebrew Temp Monitor](img_pitherm_beer.jpg "Homebrew Temp Monitor")
