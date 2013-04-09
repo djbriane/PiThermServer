@@ -36,14 +36,21 @@
         }
 
         $('.graph-24hr').sparkline(_.pluck(sensorData, 'value').reverse(), {
-          width: '500px',
-          height: '300px',
+          //xvalues: _.pluck(sensorData, 'time').reverse(),
+          width: '100%',
+          height: '200px',
           lineColor: '#0b62a4',
+          highlightLineColor: false,
           fillColor: false,
           spotRadius: 3,
           normalRangeMax: 72.0,
           normalRangeMin: 60.0,
-          lineWidth: 2
+          // chartRangeMin: 55.0,
+          // chartRangeMax: 85.0,
+          lineWidth: 2,
+          tooltipSuffix: '°',
+          //tooltipFormat: '<span style="color: {{color}}">&#9679;</span> {{x}}: {{prefix}}{{y}}{{suffix}}</span>',
+          numberFormatter: function(val) {return Math.round(val);}
         });
       }
 
