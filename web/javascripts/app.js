@@ -37,7 +37,7 @@
 
         sensorData = _.filter(sensorData, function(val, index) { return index % 6 === 0; });
         sensorData = _.pluck(sensorData, 'value').reverse();
-        sensorData = _.filter(sparkdata, function(num) { return (num > 50.0 && num < 90.0); });
+        sensorData = _.filter(sensorData, function(num) { return (num > 50.0 && num < 90.0); });
 
         $('.graph-24hr').sparkline(sensorData, {
           width: '100%',
