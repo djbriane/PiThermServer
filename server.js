@@ -34,8 +34,7 @@ var TEMP_SENSOR_ID = '28-0000047505a4'; // DS18B20 (black plastic cap)
 
 
 // maximum number of datapoints to return
-var MAX_HISTORY = 820;
-var RESOLUTION_24 = 30;
+var MAX_HISTORY = 1440;
 
 // Use node-static module to serve chart for client-side dynamic graph
 var nodestatic = require('node-static'),
@@ -84,9 +83,6 @@ function(request, response) {
 
         resData.push(resParsed);
 
-        if (i % 5) {
-
-        }
       }
 
       response.writeHead(200, {
