@@ -17,7 +17,7 @@
         if (!graph) {
           graph = window.Morris.Line({
             element: 'line-example',
-            data: data,
+            data: _.sortBy(data, function(val) { return -val.time; }).slice(0,72),
             xkey: 'time',
             ykeys: ['value'],
             labels: ['Temp Sensor'],
@@ -35,8 +35,11 @@
           graph.setData(data);
         }
 
-        $('.graph-24hr').sparkline(_.pluck(sensorData, 'value').reverse(), {
-          //xvalues: _.pluck(sensorData, 'time').reverse(),
+        sensorData = _.filter(sensorData, function(val, index) { return index % 6 === 0; });
+        sensorData = _.pluck(sensorData, 'value').reverse();
+        sensorData = _.filter(sparkdata, function(num) { return (num > 50.0 && num < 90.0); });
+
+        $('.graph-24hr').sparkline(sensorData, {
           width: '100%',
           height: '200px',
           lineColor: '#0b62a4',
@@ -45,11 +48,8 @@
           spotRadius: 3,
           normalRangeMax: 72.0,
           normalRangeMin: 60.0,
-          // chartRangeMin: 55.0,
-          // chartRangeMax: 85.0,
           lineWidth: 2,
           tooltipSuffix: '°',
-          //tooltipFormat: '<span style="color: {{color}}">&#9679;</span> {{x}}: {{prefix}}{{y}}{{suffix}}</span>',
           numberFormatter: function(val) {return Math.round(val);}
         });
       }
