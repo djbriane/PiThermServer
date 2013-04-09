@@ -32,6 +32,11 @@ dbclient.on('error', function(err) {
 //var TEMP_SENSOR_ID = '28-000002aa9557'; // DS18B20 (silver thermowell)
 var TEMP_SENSOR_ID = '28-0000047505a4'; // DS18B20 (black plastic cap)
 
+
+// maximum number of datapoints to return
+var MAX_HISTORY = 820;
+var RESOLUTION_24 = 30;
+
 // Use node-static module to serve chart for client-side dynamic graph
 var nodestatic = require('node-static'),
   port = process.env.PORT || 8000;
@@ -58,7 +63,7 @@ function(request, response) {
       '] Request from ' + (request.connection.remoteAddress + '').magenta +
       ' for: ' + (pathfile + '').yellow);
 
-    dbclient.zrevrangebyscore([TEMP_SENSOR_ID, '+inf', '-inf', 'LIMIT', 0, 150], function(err, res) {
+    dbclient.zrevrangebyscore([TEMP_SENSOR_ID, '+inf', '-inf', 'LIMIT', 0, MAX_HISTORY], function(err, res) {
 
       var temp, resParsed, resData = [];
 
@@ -78,6 +83,10 @@ function(request, response) {
         resParsed.value = temp;
 
         resData.push(resParsed);
+
+        if (i % 5) {
+
+        }
       }
 
       response.writeHead(200, {
@@ -125,6 +134,8 @@ function(request, response) {
 
 // Enable server
 server.listen(port);
+
+
 
 // resolve the device IP, then display server started message
 networkIp.getNetworkIP(function(error, ip) {

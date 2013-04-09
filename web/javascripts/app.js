@@ -11,7 +11,8 @@
     var sensorData;
     console.log('get sensor data');
     $.getJSON('./temperature.json', function(data) {
-      console.log(data);
+      sensorData = data;
+
       if (data && data.length > 0) {
         if (!graph) {
           graph = window.Morris.Line({
@@ -33,6 +34,17 @@
         } else {
           graph.setData(data);
         }
+
+        $('.graph-24hr').sparkline(_.pluck(sensorData, 'value').reverse(), {
+          width: '500px',
+          height: '300px',
+          lineColor: '#0b62a4',
+          fillColor: false,
+          spotRadius: 3,
+          normalRangeMax: 72.0,
+          normalRangeMin: 60.0,
+          lineWidth: 2
+        });
       }
 
     });
@@ -43,25 +55,7 @@
   }
 
   $(document).ready(function() {
-    // $.fn.foundationAlerts           ? $doc.foundationAlerts() : null;
-    // $.fn.foundationButtons          ? $doc.foundationButtons() : null;
-    // $.fn.foundationAccordion        ? $doc.foundationAccordion() : null;
-    // $.fn.foundationNavigation       ? $doc.foundationNavigation() : null;
-    // $.fn.foundationTopBar           ? $doc.foundationTopBar() : null;
-    // $.fn.foundationCustomForms      ? $doc.foundationCustomForms() : null;
-    // $.fn.foundationMediaQueryViewer ? $doc.foundationMediaQueryViewer() : null;
-    // $.fn.foundationTabs             ? $doc.foundationTabs({callback : $.foundation.customForms.appendCustomMarkup}) : null;
-    // $.fn.foundationTooltips         ? $doc.foundationTooltips() : null;
-    // $.fn.foundationMagellan         ? $doc.foundationMagellan() : null;
-    // $.fn.foundationClearing         ? $doc.foundationClearing() : null;
-
-    // $.fn.placeholder                ? $('input, textarea').placeholder() : null;
-
-
-
-
     getSensorData();
-
   });
 
   // Hide address bar on mobile devices (except if #hash present, so we don't mess up deep linking).
