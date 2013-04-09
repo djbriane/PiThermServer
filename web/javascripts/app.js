@@ -26,7 +26,7 @@
         if (!graph) {
           graph = window.Morris.Line({
             element: 'line-example',
-            data: data,
+            data: _.filter(data, function(val) { return (val.value > 50.0 && val.value < 90.0); }),
             xkey: 'time',
             ykeys: ['value'],
             labels: ['Temp Sensor'],
@@ -59,7 +59,7 @@
 
         $('.graph-24hr').sparkline(sensorData24, {
           width: '100%',
-          height: '200px',
+          height: '80px',
           lineColor: '#0b62a4',
           highlightLineColor: false,
           fillColor: false,
@@ -73,7 +73,7 @@
 
         $('.graph-48hr').sparkline(sensorData48, {
           width: '100%',
-          height: '200px',
+          height: '80px',
           lineColor: '#0b62a4',
           highlightLineColor: false,
           fillColor: false,
