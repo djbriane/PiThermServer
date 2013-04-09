@@ -9,21 +9,25 @@ A few lines of code to show my implementation of a NodeJS server for the DS18B20
 
 Files
 -----
-* load_gpio.sh - bash commands to load kernel modules
-* server.js - NodeJS server, returns temperature as JSON and serves other static files
+* server.js - NodeJS server, returns temperature as JSON and serves static web assets
 * sensor.js - NodeJS script for polling the sensor and storing data in a Redis DB
-* web/ - client files for displaying temperature dashboard
+* web/ - static web assets for displaying temperature dashboard
+* scripts/load_gpio.sh - bash commands to load kernel modules
+* scripts/ - various scripts for starting sensor/server on boot and displaying temperature on an LCD screen
 
 Usage
 -----
 * With sensor attached load kernel modules: sudo load_gpio.sh
-* Start sensor polling: node sensor.js
-* Start server: node server.js
+* Start sensor polling: node sensor.js (or via init.d)
+* Start server: node server.js (or via init.d)
 
 References
 ----------
+http://tomholderness.wordpress.com/2013/01/03/raspberry-pi-temperature-server/
 http://www.cl.cam.ac.uk/freshers/raspberrypi/tutorials/temperature/
 
 Screenshots/Images
 ------------------
 ![Temp Sensor Dashboard](dashboard_screen.png "Temp Sensor Dashboard")
+
+![Homebrew Temp Monitor](dashboard_screen.png "Homebrew Temp Monitor")
