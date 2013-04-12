@@ -33,7 +33,7 @@
         data = _.filter(data, function(val) { return (val.value > 50.0 && val.value < 90.0); });
 
         sensorData12 = _.filter(data, function(val, index) {
-          return (time12hrsago.isBefore(val.time) && index % 2 === 0);
+          return (time12hrsago.isBefore(val.time) && index % 6 === 0);
         });
 
         if (!graph) {

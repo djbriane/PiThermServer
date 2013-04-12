@@ -10,7 +10,8 @@ var fs = require('fs'),
   sys = require('sys'),
   util = require('util'),
   colors = require('colors'),
-  moment = require('moment');
+  moment = require('moment'),
+  stathat = require('stathat');
 
 // redis DB setup
 var redis = require('redis'),
@@ -69,6 +70,9 @@ function pollSensor() {
 
     // Log message
     util.puts('[' + timeNow.format('MMMM Do YYYY, h:mm:ss a').blue + '] Sensor reading: ' + (temp + ' F').yellow);
+
+    // send stats to StatHat
+    stathat.trackEZValue("djbriane@gmail.com", "homebrew temp sensor", temp, function(status, json) {});
 
     // poll the temp sensor again after 1 minute
     setTimeout(pollSensor, (1000 * 60));
