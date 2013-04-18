@@ -11,7 +11,8 @@ var fs = require('fs'),
   http = require('http'),
   util = require('util'),
   colors = require('colors'),
-  moment = require('moment');
+  moment = require('moment'),
+  _ = require('lodash');
 
 // Load local modules
 var networkIp = require('./networkip.js');
@@ -117,12 +118,11 @@ function(request, response) {
       ' for: ' + (pathfile + '').yellow);
 
     getSensorData(LONG_HISTORY, function(err, resData) {
-      var time14dago = new moment().subtract('days', 14);
 
       // only return data in 30m intervals
       // TODO: should average across the interval instead of just plucking the value
       resData = _.filter(resData, function(val, index) {
-        return (time14dago.isBefore(val.time) && index % 30 === 0);
+        return (index % 30 === 0);
       });
 
       response.writeHead(200, {

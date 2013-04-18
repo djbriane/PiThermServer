@@ -98,14 +98,14 @@
 
         // setup data for 7d graph
         sensorData7d = _.filter(data, function(val, index) {
-          return (time7dago.isBefore(val.time) && index % 30 === 0);
+          return (time7dago.isBefore(val.time));
         });
         sensorData7d = _.pluck(sensorData7d, 'value').reverse();
         $('.graph-7d').sparkline(sensorData7d, sparkFormat);
 
         // setup data for 14d graph
         sensorData14d = _.filter(data, function(val, index) {
-          return (time14dago.isBefore(val.time) && index % 60 === 0);
+          return (time14dago.isBefore(val.time) && index % 2 === 0);
         });
         sensorData14d = _.pluck(sensorData14d, 'value').reverse();
         $('.graph-14d').sparkline(sensorData14d, sparkFormat);
