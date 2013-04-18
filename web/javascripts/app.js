@@ -19,6 +19,8 @@
           numberFormatter: function(val) {return Math.round(val); }
         };
 
+  var MAX_RANGE = 90.0, MIN_RANGE = 50.0;
+
   // Get data from Pi NodeJS server
   function getSensorData() {
     var sensorData12, sensorData24, sensorData48, time12hrsago, time24hrsago, time48hrsago;
@@ -30,7 +32,7 @@
     console.log('get sensor data');
     $.getJSON('./temperature.json', function(data) {
       if (data && data.length > 0) {
-        data = _.filter(data, function(val) { return (val.value > 50.0 && val.value < 90.0); });
+        data = _.filter(data, function(val) { return (val.value > MIN_RANGE && val.value < MAX_RANGE); });
 
         sensorData12 = _.filter(data, function(val, index) {
           return (time12hrsago.isBefore(val.time) && index % 6 === 0);
@@ -82,8 +84,43 @@
 
   }
 
+  // Get 7d/14d data from Pi NodeJS server
+  function getWeekSensorData() {
+    var sensorData7d, sensorData14d,
+      time7dago = new window.moment().subtract('days', 7),
+      time14dago = new window.moment().subtract('days', 14);
+
+    console.log('get weekly sensor data');
+    $.getJSON('./temperature_long.json', function(data) {
+      if (data && data.length > 0) {
+        // remove data outside min/max range
+        data = _.filter(data, function(val) { return (val.value > MIN_RANGE && val.value < MAX_RANGE); });
+
+        // setup data for 7d graph
+        sensorData7d = _.filter(data, function(val, index) {
+          return (time7dago.isBefore(val.time) && index % 30 === 0);
+        });
+        sensorData7d = _.pluck(sensorData7d, 'value').reverse();
+        $('.graph-7d').sparkline(sensorData7d, sparkFormat);
+
+        // setup data for 14d graph
+        sensorData14d = _.filter(data, function(val, index) {
+          return (time14dago.isBefore(val.time) && index % 60 === 0);
+        });
+        sensorData14d = _.pluck(sensorData14d, 'value').reverse();
+        $('.graph-14d').sparkline(sensorData14d, sparkFormat);
+
+      }
+
+    });
+
+  }
+
   $(document).ready(function() {
     getSensorData();
+
+    // show 7d/14d graph
+    getWeekSensorData();
   });
 
   // Hide address bar on mobile devices (except if #hash present, so we don't mess up deep linking).
