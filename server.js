@@ -30,7 +30,7 @@ dbclient.on('error', function(err) {
 // TODO: lookup sensors automatically
 //var TEMP_SENSOR_ID = 'dev-temp-sensor'; // test sensor
 //var TEMP_SENSOR_ID = '28-00000418941a'; // DS18B20 (bare)
-//var TEMP_SENSOR_ID = '28-000002aa9557'; // DS18B20 (silver thermowell)
+var TEMP_SENSOR_ID2 = '28-000002aa9557'; // DS18B20 (silver thermowell)
 var TEMP_SENSOR_ID = '28-0000047505a4'; // DS18B20 (black plastic cap)
 
 
@@ -47,9 +47,9 @@ var nodestatic = require('node-static'),
 var staticServer = new nodestatic.Server("/home/pi/PiThermServer/web/");
 
 // get sensor data from Redis db
-function getSensorData(history, cb) {
+function getSensorData(sensorId, history, cb) {
 
-  dbclient.zrevrangebyscore([TEMP_SENSOR_ID, '+inf', '-inf', 'LIMIT', 0, history], function(err, res) {
+  dbclient.zrevrangebyscore([sensorId, '+inf', '-inf', 'LIMIT', 0, history], function(err, res) {
 
     var temp, resParsed, resData = [];
 
@@ -94,19 +94,24 @@ function(request, response) {
 
   // Test to see if it's a request for temperature data
   if (pathfile === '/temperature.json') {
+    var fullData = [];
 
     // Print requested file to terminal
     util.puts('[' + moment().format('MMMM Do YYYY, h:mm:ss a').blue +
       '] Request from ' + (request.connection.remoteAddress + '').magenta +
       ' for: ' + (pathfile + '').yellow);
 
-    getSensorData(SHORT_HISTORY, function(err, resData) {
+    response.writeHead(200, {
+      "Content-type": "application/json"
+    });
 
-      response.writeHead(200, {
-        "Content-type": "application/json"
+    getSensorData(TEMP_SENSOR_ID, SHORT_HISTORY, function(err, resData) {
+      fullData.push(resData);
+
+      getSensorData(TEMP_SENSOR_ID, SHORT_HISTORY, function(err, resData) {
+        fullData.push(resData);
+        response.end(JSON.stringify(fullData), "ascii");
       });
-
-      response.end(JSON.stringify(resData), "ascii");
 
     });
 
@@ -117,7 +122,7 @@ function(request, response) {
       '] Request from ' + (request.connection.remoteAddress + '').magenta +
       ' for: ' + (pathfile + '').yellow);
 
-    getSensorData(LONG_HISTORY, function(err, resData) {
+    getSensorData(TEMP_SENSOR_ID, LONG_HISTORY, function(err, resData) {
 
       // only return data in 30m intervals
       // TODO: should average across the interval instead of just plucking the value

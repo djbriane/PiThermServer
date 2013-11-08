@@ -30,13 +30,22 @@
     time48hrsago = new window.moment().subtract('hours', 48);
 
     console.log('get sensor data');
-    $.getJSON('./temperature.json', function(data) {
-      if (data && data.length > 0) {
-        data = _.filter(data, function(val) { return (val.value > MIN_RANGE && val.value < MAX_RANGE); });
+    $.getJSON('./temperature.json', function(response) {
+      var data = [];
+      if (response && response.length > 0) {
+        if (response[0] && response[0].length > 0) {
+          data = _.filter(response[0], function(val) { return (val.value > MIN_RANGE && val.value < MAX_RANGE); });
 
-        sensorData12 = _.filter(data, function(val, index) {
-          return (time12hrsago.isBefore(val.time) && index % 6 === 0);
-        });
+          sensorData12.push(_.filter(data, function(val, index) {
+            return (time12hrsago.isBefore(val.time) && index % 6 === 0);
+          }));
+        }
+        if (response[1] && response[1].length > 0) {
+          data = _.filter(response[1], function(val) { return (val.value > MIN_RANGE && val.value < MAX_RANGE); });
+          sensorData12.push(_.filter(data, function(val, index) {
+            return (time12hrsago.isBefore(val.time) && index % 6 === 0);
+          }));
+        }
 
         if (!graph) {
           graph = window.Morris.Line({
@@ -44,7 +53,7 @@
             data: sensorData12,
             xkey: 'time',
             ykeys: ['value'],
-            labels: ['Temp Sensor'],
+            labels: ['Sensor 1', 'Sensor 2'],
             xLabels: '5min',
             ymin: 'auto',
             ymax: 'auto',
@@ -60,7 +69,7 @@
         }
 
         // setup data for 24hr graph
-        sensorData24 = _.filter(data, function(val, index) {
+        sensorData24 = _.filter(response[0], function(val, index) {
           return (time24hrsago.isBefore(val.time) && index % 12 === 0);
         });
         sensorData24 = _.pluck(sensorData24, 'value').reverse();
@@ -73,8 +82,8 @@
         sensorData48 = _.pluck(sensorData48, 'value').reverse();
         $('.graph-48hr').sparkline(sensorData48, sparkFormat);
 
-        $('.current-temp').text(Math.round(_.first(data).value) + '°');
-        $('.current-temp-date span').text(window.moment(_.first(data).time).format('MMM Do, h:mm:ss a'));
+        $('.current-temp').text(Math.round(_.first(response[0]).value) + '°');
+        $('.current-temp-date span').text(window.moment(_.first(response[0]).time).format('MMM Do, h:mm:ss a'));
       }
 
     });
