@@ -23,7 +23,7 @@
 
   // Get data from Pi NodeJS server
   function getSensorData() {
-    var sensorData12, sensorData24, sensorData48, time12hrsago, time24hrsago, time48hrsago;
+    var sensorData12 = [], sensorData24, sensorData48, time12hrsago, time24hrsago, time48hrsago;
 
     time12hrsago = new window.moment().subtract('hours', 12);
     time24hrsago = new window.moment().subtract('hours', 24);
@@ -52,7 +52,7 @@
             element: 'line-example',
             data: sensorData12,
             xkey: 'time',
-            ykeys: ['value'],
+            ykeys: ['value', 'value'],
             labels: ['Sensor 1', 'Sensor 2'],
             xLabels: '5min',
             ymin: 'auto',

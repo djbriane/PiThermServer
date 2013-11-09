@@ -108,7 +108,7 @@ function(request, response) {
     getSensorData(TEMP_SENSOR_ID, SHORT_HISTORY, function(err, resData) {
       fullData.push(resData);
 
-      getSensorData(TEMP_SENSOR_ID, SHORT_HISTORY, function(err, resData) {
+      getSensorData(TEMP_SENSOR_ID2, SHORT_HISTORY, function(err, resData) {
         fullData.push(resData);
         response.end(JSON.stringify(fullData), "ascii");
       });
