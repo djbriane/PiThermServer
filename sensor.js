@@ -11,7 +11,8 @@ var fs = require('fs'),
   util = require('util'),
   colors = require('colors'),
   moment = require('moment'),
-  stathat = require('stathat');
+  stathat = require('stathat'),
+  gpio = require('gpio');
 
 // redis DB setup
 var redis = require('redis'),
@@ -29,8 +30,16 @@ dbclient.on('error', function(err) {
 var TEMP_SENSOR_ID2 = '28-000002aa9557'; // DS18B20 (silver thermowell)
 var TEMP_SENSOR_ID = '28-0000047505a4'; // DS18B20 (black plastic cap)
 
-// start polling the temp sensor and save to DB
+// setup GPIO pin for temperature relay
+var gpioRelay = gpio.export(18, {
+  direction: 'out',
+  interval: 200,
+  ready: function() {
+    // logic here
+  }
+});
 
+// start polling the temp sensor and save to DB
 function pollSensor(sensorId) {
   var readingData, sensorValue;
 
@@ -72,7 +81,15 @@ function pollSensor(sensorId) {
     util.puts('[' + timeNow.format('MMMM Do YYYY, h:mm:ss a').blue + '] Sensor reading: ' + (temp + ' F').yellow);
 
     // send stats to StatHat
-    //stathat.trackEZValue("djbriane@gmail.com", "homebrew temp sensor", temp, function(status, json) {});
+    stathat.trackEZValue("djbriane@gmail.com", sensorId, temp, function(status, json) {});
+
+    if (temp < 68.0) {
+      // turn heater on
+      gpioRelay.set();
+    } else {
+      // turn heater off
+      gpioRelay.reset();
+    }
 
     // poll the temp sensor again after 1 minute
     setTimeout(function() {
