@@ -12,6 +12,7 @@
     "hiredis": "0.1.x",
     "redis": "0.9.x",
     "lodash": "2.2.x",
-    "gpio": "0.2.x"
+    "gpio": "0.2.x",
+    "stathat": "0.0.x"
   }
 }

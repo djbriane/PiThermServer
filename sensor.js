@@ -78,17 +78,25 @@ function pollSensor(sensorId) {
     temp = (temp * 1.8000) + 32.00;
 
     // Log message
-    util.puts('[' + timeNow.format('MMMM Do YYYY, h:mm:ss a').blue + '] Sensor reading: ' + (temp + ' F').yellow);
+    util.puts('[' + timeNow.format('MMMM Do YYYY, h:mm:ss a').blue + '] ' + sensorId + ' reading: ' + (temp.toFixed(2) + ' F').yellow);
 
     // send stats to StatHat
-    stathat.trackEZValue("djbriane@gmail.com", sensorId, temp, function(status, json) {});
+    stathat.trackEZValue("Un8Fhd3Grs5gHUa5", sensorId, temp, function(status, json) {});
 
-    if (temp < 68.0) {
-      // turn heater on
-      gpioRelay.set();
-    } else {
-      // turn heater off
-      gpioRelay.reset();
+    if (sensorId === TEMP_SENSOR_ID2) {
+      if (temp < 68.0) {
+        // turn heater on
+        gpioRelay.set(function() {
+          //console.log('[GPIO] Relay Set (HIGH): ' + gpioRelay.value);
+	  stathat.trackEZValue("Un8Fhd3Grs5gHUa5", "Heater Relay", 1, function(status, json) {});
+        });
+      } else {
+        // turn heater off
+        gpioRelay.reset(function() {
+          //console.log('[GPIO] Relay Set (LOW): ' + gpioRelay.value);
+	  stathat.trackEZValue("Un8Fhd3Grs5gHUa5", "Heater Relay", 0, function(status, json) {});
+        });
+      }
     }
 
     // poll the temp sensor again after 1 minute
