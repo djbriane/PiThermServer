@@ -128,14 +128,16 @@
         }
 
         // setup data for 24hr graph
-        sensorData24 = _.filter(response[0], function(val, index) {
+        sensorData24 = _.filter(response[0], function(val) { return (val.value > MIN_RANGE && val.value < MAX_RANGE); });
+        sensorData24 = _.filter(sensorData24, function(val, index) {
           return (time24hrsago.isBefore(val.time) && index % 12 === 0);
         });
         sensorData24 = _.pluck(sensorData24, 'value').reverse();
         $('.graph-24hr').sparkline(sensorData24, sparkFormat);
 
         // setup data for 48hr graph
-        sensorData48 = _.filter(data, function(val, index) {
+        sensorData48 = _.filter(response[0], function(val) { return (val.value > MIN_RANGE && val.value < MAX_RANGE); });
+        sensorData48 = _.filter(sensorData48, function(val, index) {
           return (time48hrsago.isBefore(val.time) && index % 24 === 0);
         });
         sensorData48 = _.pluck(sensorData48, 'value').reverse();
