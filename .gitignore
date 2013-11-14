@@ -6,4 +6,5 @@ node_modules/
 # python specific ignores
 *.pyc
 
+data/
 server.log

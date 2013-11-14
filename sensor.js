@@ -12,9 +12,8 @@ var fs = require('fs'),
   colors = require('colors'),
   moment = require('moment'),
   stathat = require('stathat'),
-  rsync = require('rsync'),
-  watch = require('watch'),
-  gpio = require('gpio');
+  gpio = require('gpio'),
+  _ = require('lodash');
 
 // define sensor serial number (will be different for each sensor)
 // to list available sensors, enter 'ls /sys/bus/w1/devices/'
@@ -26,17 +25,13 @@ var TEMP_SENSOR_ID = '28-0000047505a4'; // DS18B20 (black plastic cap)
 
 var CONFIG_SENSOR_FREQ_MINS = 1,
     CONFIG_LOG_FREQ_MINS = 1,
-    CONFIG_DATA_DIR = 'data',
+    CONFIG_DATA_DIR = '/home/pi/PiThermServer/data',
     CONFIG_HEATER_GPIO_PIN = 18,
-    CONFIG_TEMP_LIMIT_LOW = 71.0;
+    CONFIG_TEMP_LIMIT_LOW = 62.0;
 
 // maximum number of datapoints for logging
 var CONFIG_LOG_SHORT_HISTORY = 2880, // ~48h
     CONFIG_LOG_LONG_HISTORY = 20160; // ~14d
-
-var CONFIG_REMOTE_HOST = process.env.PI_THERM_REMOTE_HOST,
-    CONFIG_REMOTE_USER = process.env.PI_THERM_REMOTE_USER,
-    CONFIG_REMOTE_LOCATION = process.env.PI_THERM_REMOTE_DIR || CONFIG_DATA_DIR;
 
 var CONFIG_STATHAT_KEY = process.env.PI_THERM_STATHAT_KEY || '';
 
@@ -56,13 +51,6 @@ var gpioRelay = gpio.export(CONFIG_HEATER_GPIO_PIN, {
     // logic here
   }
 });
-
-// Build the rsync command
-var dataSync = new rsync()
-  .shell('ssh')
-  .flags('avz')
-  .source(CONFIG_DATA_DIR)
-  .destination(CONFIG_REMOTE_USER + '@' + CONFIG_REMOTE_HOST + ':' + CONFIG_REMOTE_LOCATION);
 
 // get sensor data from Redis db
 function readSensorData(sensorId, history, cb) {
@@ -125,12 +113,16 @@ function logSensorData() {
       return (index % 30 === 0);
     });
 
-    fs.writeFile(CONFIG_DATA_DIR + "temperature_long.json", JSON.stringify(resData), function(err) {
+    fs.writeFile(CONFIG_DATA_DIR + "/temperature_long.json", JSON.stringify(resData), function(err) {
       if(err) {
         util.puts('[FILE] File Write Error: ', err);
       }
     });
   });
+
+  setTimeout(function() {
+    logSensorData();
+  }, (1000 * 60 * CONFIG_LOG_FREQ_MINS));
 
 }
 
@@ -197,7 +189,7 @@ function pollSensor(sensorId) {
     stathat.trackEZValue(CONFIG_STATHAT_KEY, sensorId, temp, function(status, json) {});
 
     if (sensorId === TEMP_SENSOR_ID2) {
-      if (temp < TEMP_LIMIT_LOW) {
+      if (temp < CONFIG_TEMP_LIMIT_LOW) {
         // turn heater on
         gpioRelay.set(function() {
           util.puts('[GPIO] Relay Set (HIGH): ' + gpioRelay.value);
@@ -211,24 +203,16 @@ function pollSensor(sensorId) {
     }
 
   });
+
+  setTimeout(function() {
+    pollSensor(sensorId);
+  }, (1000 * 60 * CONFIG_SENSOR_FREQ_MINS));
 }
 
-// setup a watch for any data changes and sync to remote server
-watch.watchTree(CONFIG_DATA_DIR, function(f, curr, prev) {
-  syncSensorData();
-});
-
 // start polling the temp sensors
-setTimeout(function() {
-  pollSensor(TEMP_SENSOR_ID);
-}, (1000 * 60 * CONFIG_SENSOR_FREQ_MINS));
-
-setTimeout(function() {
-  pollSensor(TEMP_SENSOR_ID2);
-}, (1000 * 60 * CONFIG_SENSOR_FREQ_MINS));
+pollSensor(TEMP_SENSOR_ID);
+pollSensor(TEMP_SENSOR_ID2);
 
 // start logging the sensor data
-setTimeout(function() {
-  logSensorData();
-}, (1000 * 60 * CONFIG_LOG_FREQ_MINS));
+logSensorData();
 
