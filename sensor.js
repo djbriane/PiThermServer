@@ -30,6 +30,8 @@ dbclient.on('error', function(err) {
 var TEMP_SENSOR_ID2 = '28-000002aa9557'; // DS18B20 (silver thermowell)
 var TEMP_SENSOR_ID = '28-0000047505a4'; // DS18B20 (black plastic cap)
 
+var TEMP_LIMIT_LOW = 71.0;
+
 // setup GPIO pin for temperature relay
 var gpioRelay = gpio.export(18, {
   direction: 'out',
@@ -84,7 +86,7 @@ function pollSensor(sensorId) {
     stathat.trackEZValue("Un8Fhd3Grs5gHUa5", sensorId, temp, function(status, json) {});
 
     if (sensorId === TEMP_SENSOR_ID2) {
-      if (temp < 68.0) {
+      if (temp < TEMP_LIMIT_LOW) {
         // turn heater on
         gpioRelay.set(function() {
           //console.log('[GPIO] Relay Set (HIGH): ' + gpioRelay.value);
